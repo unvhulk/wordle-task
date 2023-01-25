@@ -5,90 +5,73 @@ import { usePuzzle } from "./contexts/PuzzleContext";
 import words from "./words.json";
 
 function App() {
-	const { word, guesses, setGuesses, currentGuess, setCurrentGuess } =
-		usePuzzle();
+	const {
+		init,
+		word,
+		guesses,
+		setGuesses,
+		guessCount,
+		setGuessCount,
+		currentGuess,
+		setCurrentGuess,
+	} = usePuzzle();
 
-	const won = guesses[currentGuess - 1] === word;
+	const won = guesses[guessCount - 1] === word;
 
-	const lost = currentGuess === 6;
+	const lost = guessCount === 6;
 
-	const submitGuess = () => {
-		if (words.includes(guesses[currentGuess]))
-			setCurrentGuess((prevState) => {
-				console.log(prevState);
-				return prevState + 1;
-			});
-	};
+	const handleKeyUp = ({ key }) => {
+		if (won || lost) {
+			return;
+		}
 
-	const handleKeyUp = (e) => {
-		console.log(guesses);
-		// if (won || lost) {
-		// 	return;
-		// }
-		// if (e.key === "Enter") {
-		// 	return submitGuess();
-		// }
-		// if (e.key === "Backspace") {
-		// 	let newArr = [...guesses];
-		// 	newArr[currentGuess] = newArr[currentGuess].slice(
-		// 		0,
-		// 		newArr[currentGuess].length - 1
-		// 	);
-		// 	setGuesses(prevState => newArr);
-		// 	return;
-		// }
-		// if (guesses[currentGuess].length < 5 && e.key.match(/^[A-z]$/)) {
-		// 	let newArr = [...guesses];
-		// 	newArr[currentGuess] = newArr[currentGuess] + e.key.toLowerCase();
-		// 	setGuesses(prevState => {prevState});
-		// 	console.log("newArr", newArr);
-		// }
-		setGuesses((prevGuess) => {
-			if (won || lost) {
-				return prevGuess;
+		if (key === "Enter") {
+			if (words.includes(currentGuess)) {
+				setGuesses((prev) => {
+					let arr = [...prev];
+					arr[guessCount] = currentGuess;
+					return arr;
+				});
+				setCurrentGuess("");
+				setGuessCount((prev) => prev + 1);
 			}
-			if (e.key === "Enter") {
-				return submitGuess();
-			}
-			if (e.key === "Backspace") {
-				let newArr = [...guesses];
-				newArr[currentGuess] = newArr[currentGuess].slice(
-					0,
-					newArr[currentGuess].length - 1
-				);
-				setGuesses((prevState) => newArr);
-				return prevGuess;
-			}
-			if (prevGuess[currentGuess].length < 5 && e.key.match(/^[A-z]$/)) {
-				let newArr = [...prevGuess];
-				newArr[currentGuess] = newArr[currentGuess] + e.key.toLowerCase();
-				return newArr;
-			}
-		});
+		}
+
+		if (key === "Backspace") {
+			setCurrentGuess((prev) => prev.slice(0, -1));
+			return;
+		}
+		if (currentGuess.length < 5 && /^[A-Za-z]$/.test(key)) {
+			setCurrentGuess((prev) => prev + key);
+		}
 	};
 
 	useEffect(() => {
-		window.addEventListener("keyup", (e) => handleKeyUp(e));
-		return () => window.removeEventListener("keyup", (e) => handleKeyUp(e));
-	}, [guesses]);
+		window.addEventListener("keyup", handleKeyUp);
 
-	useEffect(() => {
-		console.log(currentGuess);
-	}, [currentGuess]);
+		return () => window.removeEventListener("keyup", handleKeyUp);
+	}, [handleKeyUp]);
 
 	return (
 		<div className='flex h-screen w-screen flex-col items-center justify-center bg-gray-600'>
 			<h1 className='bg-gradient-to-br from-blue-400 to-green-400 bg-clip-text text-6xl font-bold uppercase text-transparent'>
 				Wordle
 			</h1>
-			{guesses?.map((_, i) => (
-				<Guess key={i} guess={guesses[i]} isGuessed={i < currentGuess} />
+			<div>
+				<div>Current Guess - {currentGuess}</div>
+			</div>
+			<div>
+				<div>Current Guesses - {guesses}</div>
+			</div>
+			{guesses.map((_, i) => (
+				<Guess key={i} guess={guesses[i]} isGuessed={i < guessCount} />
 			))}
-			<h1>Won/Loss</h1>
+
+			{won && <h1>You won!</h1>}
+			{lost && <h1>You lost!</h1>}
+			{(won || lost) && <button onClick={init}>Play Again</button>}
+			<h2 onClick={init}>Reset</h2>
 			<Qwerty />
-			<div className=''>Word: {word}</div>
-			<div className=''>Guesses: {JSON.stringify(guesses)}</div>
-			<div className=''>{currentGuess}</div>
 		</div>
 	);
 }
