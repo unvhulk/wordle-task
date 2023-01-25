@@ -13,7 +13,6 @@ function App() {
 		guessCount,
 		setGuessCount,
 		currentGuess,
-		setCurrentGuess,
 	} = usePuzzle();
 
 	const won = guesses[guessCount - 1] === word;
@@ -26,23 +25,28 @@ function App() {
 		}
 
 		if (key === "Enter") {
-			if (words.includes(currentGuess)) {
-				setGuesses((prev) => {
-					let arr = [...prev];
-					arr[guessCount] = currentGuess;
-					return arr;
-				});
-				setCurrentGuess("");
+			if (words.includes(currentGuess.current)) {
+				currentGuess.current = "";
 				setGuessCount((prev) => prev + 1);
 			}
 		}
 
 		if (key === "Backspace") {
-			setCurrentGuess((prev) => prev.slice(0, -1));
+			currentGuess.current = currentGuess.current.slice(0, -1);
+			setGuesses((prev) => {
+				let arr = [...prev];
+				arr[guessCount] = currentGuess.current;
+				return arr;
+			});
 			return;
 		}
-		if (currentGuess.length < 5 && /^[A-Za-z]$/.test(key)) {
-			setCurrentGuess((prev) => prev + key);
+		if (currentGuess.current.length < 5 && /^[A-Za-z]$/.test(key)) {
+			currentGuess.current += key;
+			setGuesses((prev) => {
+				let arr = [...prev];
+				arr[guessCount] = currentGuess.current;
+				return arr;
+			});
 		}
 	};
 
@@ -57,20 +61,22 @@ function App() {
 			<h1 className='bg-gradient-to-br from-blue-400 to-green-400 bg-clip-text text-6xl font-bold uppercase text-transparent'>
 				Wordle
 			</h1>
-			<div>
-				<div>Current Guess - {currentGuess}</div>
+			{/* <div>
+				<div>Current Guess - {currentGuess.current}</div>
 			</div>
 			<div>
 				<div>Current Guesses - {guesses}</div>
-			</div>
+			</div> */}
 			{guesses.map((_, i) => (
-				<Guess key={i} guess={guesses[i]} isGuessed={i < guessCount} />
+				<Guess key={i + 8} guess={guesses[i]} isGuessed={i < guessCount} />
 			))}
 
 			{won && <h1>You won!</h1>}
 			{lost && <h1>You lost!</h1>}
 			{(won || lost) && <button onClick={init}>Play Again</button>}
+
 			<h2 onClick={init}>Reset</h2>
+
 			<Qwerty />
 		</div>
 	);
