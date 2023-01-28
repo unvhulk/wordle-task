@@ -7,16 +7,16 @@ export const Guess = ({ isGuessed, guess }) => {
 			{new Array(5).fill("").map((_, i) => {
 				const bgColor = !isGuessed
 					? "bg-black"
-					: guess[i] === word[i]
+					: guess[i].toLowerCase() === word[i]
 					? "bg-green-400"
-					: word.includes(guess[i])
+					: word.includes(guess[i].toLowerCase())
 					? "bg-yellow-400"
 					: "bg-black";
 
 				return (
 					<div
 						key={i}
-						className={`flex h-16 w-16 items-center justify-center border border-gray-400 font-bold uppercase text-white ${bgColor}`}>
+						className={`flex h-12 w-14 items-center justify-center border border-gray-400 font-bold uppercase text-white ${bgColor}`}>
 						{guess[i]}
 					</div>
 				);
