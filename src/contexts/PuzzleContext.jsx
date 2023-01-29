@@ -14,6 +14,7 @@ const PuzzleProvider = ({ children }) => {
 	const currentGuess = useRef("");
 	const [guesses, setGuesses] = useState(new Array(6).fill(""));
 	const [guessCount, setGuessCount] = useState(0);
+	const [openToast, setOpenToast] = useState(false);
 
 	const result =
 		guesses[guessCount - 1] === word ? "won" : guessCount < 6 ? "play" : "lost";
@@ -42,16 +43,22 @@ const PuzzleProvider = ({ children }) => {
 		setGuessCount(0);
 	};
 
+	const showToast = () => {
+		setOpenToast(true);
+		setTimeout(() => setOpenToast(false), 1000);
+	};
+
 	const handleKeyUp = ({ key }) => {
 		if (result === "won" || result === "lost") {
 			return;
 		}
 
 		if (key === "Enter" || key === "ENTER") {
-			console.log(guessCount);
 			if (dictionary.includes(currentGuess.current.toLowerCase())) {
 				currentGuess.current = "";
 				setGuessCount((prev) => prev + 1);
+			} else {
+				showToast();
 			}
 		}
 
@@ -77,6 +84,7 @@ const PuzzleProvider = ({ children }) => {
 	return (
 		<PuzzleContext.Provider
 			value={{
+				openToast,
 				word,
 				reset,
 				result,
